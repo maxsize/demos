@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import {Text, Radio, Select, Table} from './Forms';
-import { Side } from "./Side";
+import { ConnectedSide } from "./Side";
 import * as Store from "./Store";
 import { createStore } from "redux";
 import { connect, Provider } from "react-redux";
@@ -49,7 +49,7 @@ class App extends Component {
                   </div>
                 </div>
               </div>
-              <Side store={this.store}/>
+              <ConnectedSide/>
             </div>
           </div>
         </div>        

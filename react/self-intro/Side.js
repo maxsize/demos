@@ -1,62 +1,63 @@
-import PropTypes from 'prop-types';
-import React, { Component } from "react";
-import { CHANGE_TYPE, CHANGE_VALUE } from "./Store";
-import { connect } from "react-redux";
+import React, { Component } from "react"
+import { CHANGE_TYPE, CHANGE_VALUE } from "./Store"
+import { connect } from "react-redux"
 
-export class Side extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {}
+const sideStateToProps = (state) => {
+  return {
+    selectedItem: state.find(item => item.selected)
   }
+}
 
-  componentWillMount() {
-    this.props.store.subscribe(() => {
-      const state = this.props.store.getState();
-      const selectedItem = state.find(item => item.selected);
-      if (selectedItem) this.toggle(selectedItem);
-    })
-  }
-
-  toggle(content) {
-    this.setState({
-      selectedType:content.type,
-      content:content,
-    })
-  }
-  
+class Side extends Component {
   render() {
-    let editor;
-    switch (this.state.selectedType) {
-      case 'text':
-        editor = <TextInputEditor content={this.state.content}/>
-        break;
-      case 'radio':
-        editor = <RadioEditor content={this.state.content}/>
-        break;
-      case 'select':
-        editor = <LocationEditor content={this.state.content}/>
-        break;
-      case 'table':
-        editor = <TableEditor content={this.state.content}/>
-        break;
-      default:
-        editor = <div className='vCenter'><p className='non-selected'>没有选中的字段</p></div>
-        break;
-    }
+    let selectedItem = this.props.selectedItem;
     return (
       <div className="side">
         <header className="App-header">
           添加字段
         </header>
-        <TypeSelector store={this.props.store}/>
+        <ConnectedSelector selectedItem={selectedItem}/>
         <header className="App-header">
           编辑字段
         </header>
-        {editor}
+        <ConnectedEditor selectedItem={selectedItem}/>
       </div>
     );
   }
 }
+export const ConnectedSide = connect(sideStateToProps)(Side)
+
+const editorStateToProps = (state, ownProps) => {
+  return {
+    type: ownProps.selectedItem ? ownProps.selectedItem.type : undefined
+  }
+}
+class CommonEditor extends Component {
+  render() {
+    let { type, selectedItem } = this.props;
+    // let type = selectedItem ? selectedItem.type : undefined;
+    let editor;
+    switch (type) {
+      case 'text':
+        editor = <TextInputEditor content={selectedItem}/>
+        break;
+      case 'radio':
+        editor = <RadioEditor content={selectedItem}/>
+        break;
+      case 'select':
+        editor = <LocationEditor content={selectedItem}/>
+        break;
+      case 'table':
+        editor = <TableEditor content={selectedItem}/>
+        break;
+      default:
+        editor = <div className='vCenter'><p className='non-selected'>没有选中的字段</p></div>
+        break;
+    }
+    return editor;
+  }
+}
+const ConnectedEditor = connect(editorStateToProps)(CommonEditor)
   
 class BasicEditor extends Component {
   preRender() {
@@ -145,6 +146,12 @@ class TableEditor extends BasicEditor {
     }
 }
 
+const fieldStateToProps = (state, ownProps) => {
+  return {
+    value: ownProps.value,
+    name: ownProps.name
+  }
+}
 const fieldDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: (e) => {
@@ -154,52 +161,56 @@ const fieldDispatchToProps = (dispatch, ownProps) => {
 }
 
 class FieldInput extends Component {
-  // handleChange(e) {
-  //   this.props.handleChange(e.target.name, e.target.value);
-  // }
+  componentDidMount () {
+    this.refs.inp.value = this.props.value ? this.props.value : "";
+  }
   render() {
-    let onChange = this.props.onChange;
+    let { onChange } = this.props;
     return (
-      // <input type='text' value={this.props.value} name={this.props.name} onChange={this.handleChange.bind(this)}/>
-      <input type='text' value={this.props.value} name={this.props.name} onChange={onChange}/>
+      <input type='text' ref='inp' name={this.props.name} onChange={onChange}/>
     )
   }
 }
-
 const ConnectedFieldInput = connect(null, fieldDispatchToProps)(FieldInput)
-  
-class TypeSelector extends Component {
-  state = {selectedType:''}
-  componentWillMount() {
-    this.props.store.subscribe(() => {
-      const state = this.props.store.getState();
-      const selectedItem = state.find(item => item.selected);
-      this.setState({selectedType:selectedItem.type});
-    })
-  }
 
-  handleClick(type) {
-    this.setState({selectedType:type});
-    this.props.store.dispatch({type:CHANGE_TYPE, formType:type});
+const selectorStateToProps = (state, ownProps) => {
+  return {
+    type: ownProps.selectedItem ? ownProps.selectedItem.type : ""
   }
+}
+class TypeSelector extends Component {
   render() {
+    let {type} = this.props;
     return (
       <div>
-        <TypeItem selectedType={this.state.selectedType} handleClick={this.handleClick.bind(this)} type='text' name='单行文本'/>
-        <TypeItem selectedType={this.state.selectedType} handleClick={this.handleClick.bind(this)} type='table' name='矩阵单选'/>
-        <TypeItem selectedType={this.state.selectedType} handleClick={this.handleClick.bind(this)} type='radio' name='单项选择'/>
-        <TypeItem selectedType={this.state.selectedType} handleClick={this.handleClick.bind(this)} type='select' name='下拉框'/>
+        <ConnectedTypeItem selectedType={type} type='text' name='单行文本'/>
+        <ConnectedTypeItem selectedType={type} type='table' name='矩阵单选'/>
+        <ConnectedTypeItem selectedType={type} type='radio' name='单项选择'/>
+        <ConnectedTypeItem selectedType={type} type='select' name='下拉框'/>
       </div>
     )
   }
 }
+const ConnectedSelector = connect(selectorStateToProps)(TypeSelector)
 
-class TypeItem extends Component {
-  state = {}
-  render() {
-    let style = this.props.type == this.props.selectedType ? {backgroundColor:'#b9cbe6'} : {};
-    return (
-      <div className="ui-type" onClick={(e) => this.props.handleClick(this.props.type)} style={style}>{this.props.name}</div>
+const typeStateToProps = (state, ownProps) => {
+  return {
+    style: ownProps.type == ownProps.selectedType ? {backgroundColor:'#b9cbe6'} : {}
+  }
+}
+const typeDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onChangeType: () => (
+      dispatch({type: CHANGE_TYPE, formType: ownProps.type})
     )
   }
 }
+class TypeItem extends Component {
+  render() {
+    let { style, name, onChangeType } = this.props;
+    return (
+      <div className="ui-type" onClick={onChangeType} style={style}>{name}</div>
+    )
+  }
+}
+const ConnectedTypeItem = connect(typeStateToProps, typeDispatchToProps)(TypeItem)
