@@ -53,6 +53,7 @@ export const defaultStatus = [
 export const SELECT = "select";
 export const CHANGE_TYPE = "changeType";
 export const CHANGE_VALUE = "changeValue";
+export const ADD_VALUE = "addValue";
 
 export function reducer(state = defaultStatus, action) {
     // make sure required field woun't be undefined
@@ -105,6 +106,15 @@ export function reducer(state = defaultStatus, action) {
           {
             if (propName) selected[propName][key] = value;  /* changing value from an array */
             else selected[key] = value;                     /* changing value from object */
+            selected.requireUpdate = !selected.requireUpdate;
+          }
+          return newState;
+        case ADD_VALUE:
+          newState = state.slice(0);
+          selected = newState.find(s => s.selected);
+          if (selected)
+          {
+            let arr = selected[propName].splice(index+1, 0, 'new item');  /* insert an empty string */
             selected.requireUpdate = !selected.requireUpdate;
           }
           return newState;

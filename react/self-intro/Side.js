@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { CHANGE_TYPE, CHANGE_VALUE } from "./Store"
+import { CHANGE_TYPE, CHANGE_VALUE, ADD_VALUE } from "./Store"
 import { connect } from "react-redux"
 
 const sideStateToProps = (state) => {
@@ -29,12 +29,15 @@ export const ConnectedSide = connect(sideStateToProps)(Side)
 
 const editorStateToProps = (state, ownProps) => {
   return {
-    type: ownProps.selectedItem ? ownProps.selectedItem.type : undefined
+    type: ownProps.selectedItem ? ownProps.selectedItem.type : undefined,
+    requireUpdate: ownProps.selectedItem ? ownProps.selectedItem.requireUpdate : false,
+    diploma: ownProps.selectedItem ? ownProps.selectedItem.diploma : null,
+    location: ownProps.selectedItem ? ownProps.selectedItem.location : null,
   }
 }
 class CommonEditor extends Component {
   render() {
-    let { type, selectedItem } = this.props;
+    let { type, selectedItem, diploma, location } = this.props;
     // let type = selectedItem ? selectedItem.type : undefined;
     let editor;
     switch (type) {
@@ -42,10 +45,10 @@ class CommonEditor extends Component {
         editor = <TextInputEditor content={selectedItem}/>
         break;
       case 'radio':
-        editor = <RadioEditor content={selectedItem}/>
+        editor = <ListEditor label='学历' list={diploma} propName='diploma' content={selectedItem}/>
         break;
       case 'select':
-        editor = <LocationEditor content={selectedItem}/>
+      editor = <ListEditor label='城市' list={location} propName='location' content={selectedItem}/>
         break;
       case 'table':
         editor = <TableEditor content={selectedItem}/>
@@ -64,9 +67,9 @@ class BasicEditor extends Component {
     return (
       <div>
         <p className="subtitle">标题</p>
-        <ConnectedFieldInput name="title" value={this.props.content.title}/>
+        <ConnectedFieldInput name="title" value={this.props.content.title} hideAdd={true}/>
         <p className="description">描述</p>
-        <ConnectedFieldInput name="description" value={this.props.content.description}/>
+        <ConnectedFieldInput name="description" value={this.props.content.description} hideAdd={true}/>
       </div>
     )
   };
@@ -86,37 +89,23 @@ class TextInputEditor extends BasicEditor {
   }
 }
 
-class RadioEditor extends BasicEditor {
+class ListEditor extends BasicEditor {
   render() {
     const pre = this.preRender();
-    const diploma = this.props.content.diploma;
-    const inputs = diploma.map(
-        dip => <ConnectedFieldInput name={diploma.indexOf(dip)} value={dip} propName='diploma'/>
+    // const diploma = this.props.content.diploma;
+    const { label, list, propName } = this.props;
+    const inputs = list.map(
+        (item, index) => <ConnectedFieldInput name={index}
+                                              key={propName+index}
+                                              value={item} propName={propName}/>
       );
     return (
       <div className='subcontainer'>
         {pre}
-        <p>学历</p>
+        <p>{label}</p>
         {inputs}
       </div>
     )
-  }
-}
-
-class LocationEditor extends BasicEditor {
-  render() {
-      let pre = this.preRender();
-      const location = this.props.content.location;
-      const inputs = location.map(
-          loc => <ConnectedFieldInput name={location.indexOf(loc)} value={loc} propName='location'/>
-      );
-      return (
-          <div className='subcontainer'>
-              {pre}
-              <p>城市</p>
-              {inputs}
-          </div>
-      )
   }
 }
 
@@ -126,12 +115,14 @@ class TableEditor extends BasicEditor {
       const abilities = this.props.content.abilities;
       const levels = this.props.content.levels;
       const inputs1 = abilities.map(
-          abi => <ConnectedFieldInput name={abilities.indexOf(abi)} 
+          (abi, index) => <ConnectedFieldInput name={abilities.indexOf(abi)} 
+                                      index={index} key={index}
                                       value={abi} propName='abilities'/>
       );
       const inputs2 = levels.map(
-          lv => <ConnectedFieldInput name={levels.indexOf(lv)}
+          (lv, index) => <ConnectedFieldInput name={levels.indexOf(lv)}
                                       value={lv} 
+                                      index={index} key={index}
                                       propName='levels'/>
       );
       return (
@@ -156,6 +147,9 @@ const fieldDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: (e) => {
       dispatch({type: CHANGE_VALUE, key: ownProps.name, value: e.target.value, propName: ownProps.propName})      
+    },
+    onAdd: () => {
+      dispatch({type: ADD_VALUE, propName: ownProps.propName, index: ownProps.name})
     }
   }
 }
@@ -165,9 +159,13 @@ class FieldInput extends Component {
     this.refs.inp.value = this.props.value ? this.props.value : "";
   }
   render() {
-    let { onChange } = this.props;
+    let { onChange, onAdd } = this.props;
+    let addButton = this.props.hideAdd ? null : <span onClick={onAdd}>+</span>;
     return (
-      <input type='text' ref='inp' name={this.props.name} onChange={onChange}/>
+      <div style={{display:'inline-block'}}>
+        <input type='text' ref='inp' name={this.props.name} onChange={onChange}/>
+        {addButton}
+      </div>
     )
   }
 }
