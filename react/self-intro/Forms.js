@@ -52,7 +52,7 @@ export class Table extends Component {
         abilities.forEach(abi => {
             const radios = levels.map((lv, index) => <td><input type="radio" name="self-ass1" id={`ass${index}`} value={index}/></td>)
             trs.push(
-                <tr class="row-content">
+                <tr className="row-content">
                     <td>{abi}</td>
                     {radios}
                 </tr>
@@ -61,12 +61,14 @@ export class Table extends Component {
         const tds = levels.map(lv => <td>{lv}</td>)
         return (
             <table className="table">
-                <tr class="row-title">
-                  <td></td>
-                  {tds}
-                </tr>
-                {trs}
-              </table>
+                <tbody>
+                    <tr className="row-title">
+                    <td></td>
+                    {tds}
+                    </tr>
+                    {trs}
+                </tbody>
+            </table>
         )
     }
 }

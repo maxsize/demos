@@ -1,4 +1,4 @@
-// import { createStore } from "redux";
+import { createStore } from "redux";
 import { ActionTypes } from "redux/es/createStore";
 
 export const defaultStatus = [
@@ -78,7 +78,7 @@ export function reducer(state = defaultStatus, action) {
         }
     }
 
-    const { type, index, formType, value, key } = action;
+    const { type, index, formType, value, key, propName } = action;
     let newState = undefined;
     let selected = undefined;
     switch (type) {
@@ -90,6 +90,7 @@ export function reducer(state = defaultStatus, action) {
           const item = newState[index];
           item.selected = true;
           return newState;
+          break;
         case CHANGE_TYPE:
           newState = state.slice(0);
           selected = newState.find(s => s.selected);
@@ -101,7 +102,11 @@ export function reducer(state = defaultStatus, action) {
           newState = state.slice(0);
           selected = newState.find(s => s.selected);
           if (selected)
-            selected[key] = value;
+          {
+            if (propName) selected[propName][key] = value;  /* changing value from an array */
+            else selected[key] = value;                     /* changing value from object */
+            selected.requireUpdate = !selected.requireUpdate;
+          }
           return newState;
         case ActionTypes.INIT:
           return defaultStatus;
