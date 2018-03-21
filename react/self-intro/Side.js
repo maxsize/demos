@@ -33,11 +33,13 @@ const editorStateToProps = (state, ownProps) => {
     requireUpdate: ownProps.selectedItem ? ownProps.selectedItem.requireUpdate : false,
     diploma: ownProps.selectedItem ? ownProps.selectedItem.diploma : null,
     location: ownProps.selectedItem ? ownProps.selectedItem.location : null,
+    abilities: ownProps.selectedItem ? ownProps.selectedItem.abilities : null,
+    levels: ownProps.selectedItem ? ownProps.selectedItem.levels : null,
   }
 }
 class CommonEditor extends Component {
   render() {
-    let { type, selectedItem, diploma, location } = this.props;
+    let { type, selectedItem, diploma, location, abilities, levels } = this.props;
     // let type = selectedItem ? selectedItem.type : undefined;
     let editor;
     switch (type) {
@@ -45,13 +47,14 @@ class CommonEditor extends Component {
         editor = <TextInputEditor content={selectedItem}/>
         break;
       case 'radio':
-        editor = <ListEditor label='学历' list={diploma} propName='diploma' content={selectedItem}/>
+        editor = <ListEditor list={[{label: '学历', propName:'diploma', value: diploma}]} content={selectedItem}/>
         break;
       case 'select':
-      editor = <ListEditor label='城市' list={location} propName='location' content={selectedItem}/>
+      editor = <ListEditor list={[{label: '城市', propName:'location', value: location}]} content={selectedItem}/>
         break;
       case 'table':
-        editor = <TableEditor content={selectedItem}/>
+        editor = <ListEditor list={[{label: '题目', propName:'abilities', value: abilities},
+                                    {label: '选项', propName:'levels', value: levels}]} content={selectedItem}/>
         break;
       default:
         editor = <div className='vCenter'><p className='non-selected'>没有选中的字段</p></div>
@@ -93,48 +96,26 @@ class ListEditor extends BasicEditor {
   render() {
     const pre = this.preRender();
     // const diploma = this.props.content.diploma;
-    const { label, list, propName } = this.props;
-    const inputs = list.map(
-        (item, index) => <ConnectedFieldInput name={index}
-                                              key={propName+index}
-                                              value={item} propName={propName}/>
-      );
+    const { list } = this.props;
+    const wrappers = list.map(
+      (obj) => {
+        const { label, propName, value } = obj;
+        const len = value.length;
+        const inputs = value.map(
+          (item, index) => <ConnectedFieldInput name={index}
+                                                key={propName+len+index}
+                                                value={item} propName={propName}/>
+        );
+        return <div><p>{label}</p>{inputs}</div>
+      }
+    )
     return (
       <div className='subcontainer'>
         {pre}
-        <p>{label}</p>
-        {inputs}
+        {wrappers}
       </div>
     )
   }
-}
-
-class TableEditor extends BasicEditor {
-    render() {
-      let pre = this.preRender();
-      const abilities = this.props.content.abilities;
-      const levels = this.props.content.levels;
-      const inputs1 = abilities.map(
-          (abi, index) => <ConnectedFieldInput name={abilities.indexOf(abi)} 
-                                      index={index} key={index}
-                                      value={abi} propName='abilities'/>
-      );
-      const inputs2 = levels.map(
-          (lv, index) => <ConnectedFieldInput name={levels.indexOf(lv)}
-                                      value={lv} 
-                                      index={index} key={index}
-                                      propName='levels'/>
-      );
-      return (
-          <div className='subcontainer'>
-              {pre}
-              <p>题目</p>
-              {inputs1}
-              <p>选项</p>
-              {inputs2}
-          </div>
-      )
-    }
 }
 
 const fieldStateToProps = (state, ownProps) => {
