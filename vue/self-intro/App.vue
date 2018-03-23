@@ -18,7 +18,7 @@
             <div :style="{paddingLeft:'20px', paddingTop:'1px'}"><h3>个人登记表单</h3></div>
             <hr/>
             <form>
-              <parameter-comp v-for="(param, index) in parameters" :selectedIndex="selectedIndex" :info="param" :key="index" @selected="handleSelect"/>
+              <parameter-comp v-for="(param, index) in this.$store.state.parameters" :info="param" :key="index"/>
             </form>
             <hr/>
             <div :style="{paddingLeft:'20px',paddingBottom:'10px'}">
@@ -26,7 +26,7 @@
             </div>
           </div>
         </div>
-        <side :info="selectedItem"/>
+        <side/>
       </div>
     </div>
   </div>
@@ -43,63 +43,9 @@ export default {
     ParameterComp,
     Side
   },
-  data: function () {
-    return {
-      selectedIndex: -1,
-      parameters: [
-        {
-          type:'text',
-          title:'留下你的大名吧',
-          description:'请告诉我你的大名',
-        },
-        {
-          type:'radio',
-          title:'你的最高学历',
-          description:'请告诉我你的最高学历，我们想了解一下',
-          diploma:[
-            '专科',
-            '本科',
-            '硕士',
-            '博士',
-          ]
-        },
-        {
-          type:'select',
-          title:'你在哪里呢',
-          // description:'22',
-          location:[
-            '北京',
-            '成都',
-            '上海',
-          ]
-        },
-        {
-          type:'table',
-          title:'自我评估',
-          // description:'11',
-          abilities:[
-            '沟通技巧',
-            '时间观念',
-            '技能熟练',
-          ],
-          levels:[
-            '较差',
-            '一般',
-            '还不错',
-            '这是我的强项',
-          ]
-        }
-      ]
-    }
-  },
-  methods: {
-    handleSelect: function (index) {
-      this.selectedIndex = index
-    }
-  },
   computed: {
-    selectedItem: function () {
-      return this.selectedIndex >= 0 ? this.parameters[this.selectedIndex] : {}
+    selectedItem () {
+      return this.$store.state.selectedIndex >= 0 ? this.store.state.parameters[this.store.state.selectedIndex] : {}
     }
   }
 }

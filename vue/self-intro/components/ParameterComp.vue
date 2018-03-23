@@ -12,6 +12,7 @@
 
 <script>
 import CommonForm from "./CommonForm";
+import { MUT_SELECT } from "../store/index";
 
 export default {
   name: 'ParameterComp',
@@ -19,18 +20,19 @@ export default {
     CommonForm,
   },
   props: {
-    selectedIndex: Number,
     info: Object,
   },
   methods: {
     handleClick: function () {
-      this.$emit('selected', this.$vnode.key)
+      // this.$emit('selected', this.$vnode.key)
+      this.$store.commit(MUT_SELECT, this.$vnode.key)
     }
   },
   computed: {
     getStyle: function () {
       return this.selectedIndex === this.$vnode.key ? 'subcontainer-highlight' : 'subcontainer'
     },
+    selectedIndex () { return this.$store.state.selectedIndex },
     type: function () { return this.info.type },
     title: function () { return this.info.title },
     description: function () { return this.info.description },
