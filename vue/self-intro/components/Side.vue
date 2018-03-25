@@ -7,14 +7,15 @@
         <header class="App-header">
         编辑字段
         </header>
-        <editor :type="infoType" :content="info"/>
+        <div v-if="!info" class="non-selected">没有选择任何属性</div>
+        <editor v-else :type="infoType" :content="info"/>
     </div>
 </template>
 
 <script>
 import TypeSelector from './TypeSelector'
 import Editor from './Editor'
-import { MUT_CHANGE_TYPE } from "../store/index";
+import { MUT_CHANGE_TYPE } from '../store/index'
 
 export default {
   name: 'Side',

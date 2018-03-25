@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import CommonForm from "./CommonForm";
-import { MUT_SELECT } from "../store/index";
+import CommonForm from './CommonForm'
+import { MUT_SELECT } from '../store/index'
 
 export default {
   name: 'ParameterComp',

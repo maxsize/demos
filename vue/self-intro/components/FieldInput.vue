@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { MUT_CHANGE_VALUE } from "../store/index";
+import { MUT_CHANGE_VALUE } from '../store/index'
 
 export default {
   name: 'FieldInput',
